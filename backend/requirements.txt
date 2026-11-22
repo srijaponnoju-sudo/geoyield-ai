@@ -1,0 +1,13 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+python-multipart>=0.0.9
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+joblib>=1.3
+pillow>=10.0
+python-dotenv>=1.0
+gTTS>=2.5   # fallback voice for Hindi/Telugu when the PC has no voice installed (needs internet)
+# Needed only for the leaf-disease model (Phase: image detection):
+# tensorflow>=2.15

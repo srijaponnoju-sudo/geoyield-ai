@@ -1,0 +1,13 @@
+{
+  "dataset": "PlantVillage",
+  "n_classes": 38,
+  "max_images_per_class": 150,
+  "train_images": 3990,
+  "test_images": 874,
+  "epochs_max": 6,
+  "test_accuracy": 0.9005,
+  "test_macro_f1": 0.8997,
+  "test_loss": 0.3556,
+  "image_size": 224,
+  "note": "PlantVillage photos are lab-style leaves on plain backgrounds; accuracy on real field photos is usually lower."
+}

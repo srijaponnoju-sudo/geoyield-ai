@@ -1,0 +1,33 @@
+{
+  "_note": "General agronomy knowledge base for rule-based screening. Entries list POSSIBLE causes only; they are not confirmed diagnoses. Chemical names/doses are intentionally omitted - consult the local Agriculture Officer / KVK.",
+  "conditions": [
+    {"id": "n_def", "name": "Nitrogen deficiency (possible)", "kind": "nutrient",
+     "keywords": ["yellow leaves", "yellowing", "pale leaves", "older leaves yellow", "stunted growth", "slow growth"],
+     "next_steps": ["Get a soil test / Soil Health Card reading for nitrogen.", "Check the fertilizer evaluation module before applying any nitrogen source."],
+     "prevention": ["Balanced fertilization based on soil test.", "Include organic matter / crop rotation with legumes."]},
+    {"id": "p_def", "name": "Phosphorus deficiency (possible)", "kind": "nutrient",
+     "keywords": ["purple leaves", "purplish", "dark green leaves", "stunted growth", "poor root growth", "delayed maturity"],
+     "next_steps": ["Soil test for available phosphorus and pH.", "Compare with crop requirement in the fertilizer module."],
+     "prevention": ["Maintain soil pH in the crop's suitable range (P availability drops in very acidic/alkaline soil)."]},
+    {"id": "k_def", "name": "Potassium deficiency (possible)", "kind": "nutrient",
+     "keywords": ["brown edges", "leaf scorch", "burnt leaf margins", "drying leaves", "yellow edges"],
+     "next_steps": ["Soil test for potassium.", "Rule out water stress and salinity first."],
+     "prevention": ["Soil-test based potash use; return crop residues where suitable."]},
+    {"id": "leaf_spot", "name": "Fungal leaf spot (possible)", "kind": "disease",
+     "keywords": ["brown spots", "dark spots", "leaf spots", "spots with yellow halo", "circular spots"],
+     "next_steps": ["Remove and destroy badly affected leaves.", "Upload a clear leaf photo to the image detector (supported crops only).", "Consult the local Agriculture Officer / KVK for a confirmed diagnosis and approved treatment."],
+     "prevention": ["Avoid overhead irrigation and leaf wetness late in the day.", "Use crop rotation and clean seed; keep field free of infected debris."]},
+    {"id": "mildew", "name": "Powdery mildew (possible)", "kind": "disease",
+     "keywords": ["white patches", "white powder", "powdery coating", "white coating on leaves"],
+     "next_steps": ["Isolate/remove heavily affected leaves.", "Confirm with an extension officer before any treatment."],
+     "prevention": ["Improve air circulation and avoid excess nitrogen.", "Choose resistant varieties where available."]},
+    {"id": "virus_pest", "name": "Viral disease or sucking-pest damage (possible)", "kind": "disease/pest",
+     "keywords": ["leaf curling", "curled leaves", "mosaic", "mottled leaves", "puckered leaves", "stunted growth"],
+     "next_steps": ["Check the underside of leaves for insects (whitefly, aphids, mites).", "Remove and destroy severely affected plants to limit spread.", "Confirm with a local expert."],
+     "prevention": ["Use clean/certified seedlings and control weeds that host insects.", "Monitor the field regularly."]},
+    {"id": "water_stress", "name": "Water stress or root problem (possible)", "kind": "abiotic",
+     "keywords": ["wilting", "drying leaves", "dry leaves", "drooping", "leaf drop"],
+     "next_steps": ["Check soil moisture at root depth and drainage.", "Inspect roots/stem base for rot or insects."],
+     "prevention": ["Regular, adequate irrigation; avoid waterlogging."]}
+  ]
+}

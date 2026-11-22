@@ -1,0 +1,15 @@
+{
+  "_source": "Nutrient grades (% N-P2O5-K2O) are the standard commercial grades of Indian fertilizers under the Fertiliser Control Order (FCO). Confirm with the bag label, Soil Health Card advisory, PJTSAU/ICAR recommendations before use.",
+  "fertilizers": [
+    {"name": "Urea", "npk": [46, 0, 0], "type": "straight nitrogen"},
+    {"name": "DAP (Diammonium Phosphate)", "npk": [18, 46, 0], "type": "nitrogen + phosphorus"},
+    {"name": "SSP (Single Super Phosphate)", "npk": [0, 16, 0], "type": "straight phosphorus"},
+    {"name": "MOP (Muriate of Potash)", "npk": [0, 0, 60], "type": "straight potassium"},
+    {"name": "NPK 10-26-26", "npk": [10, 26, 26], "type": "complex"},
+    {"name": "NPK 12-32-16", "npk": [12, 32, 16], "type": "complex"},
+    {"name": "NPK 17-17-17", "npk": [17, 17, 17], "type": "complex"},
+    {"name": "NPK 19-19-19", "npk": [19, 19, 19], "type": "complex (water soluble)"},
+    {"name": "NPK 20-20-0", "npk": [20, 20, 0], "type": "complex"},
+    {"name": "Ammonium Sulphate", "npk": [21, 0, 0], "type": "straight nitrogen"}
+  ]
+}

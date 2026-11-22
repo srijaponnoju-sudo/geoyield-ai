@@ -1,0 +1,14 @@
+{
+  "dataset": "crop_production.csv",
+  "rows_in_file": 246091,
+  "train_rows": 220778,
+  "test_rows": 10900,
+  "split": "time-based: train years < 2014, test years >= 2014",
+  "MAE": 1.0255,
+  "RMSE": 3.0227,
+  "R2": 0.9216,
+  "baseline_crop_average_MAE": 1.9299,
+  "baseline_crop_average_R2": 0.7442,
+  "unit": "tonnes per hectare",
+  "note": "Uses state, district, season, crop and area only (no weather columns exist in this dataset)."
+}

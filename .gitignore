@@ -1,0 +1,11 @@
+venv/
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.env
+backend/geoyield.db
+backend/ml/datasets/PlantVillage-Dataset/
+backend/models_store/*.keras
+*.log
+.vscode/
