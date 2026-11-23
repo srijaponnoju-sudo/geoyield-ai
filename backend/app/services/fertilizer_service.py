@@ -12,7 +12,7 @@ NUTS = ["N", "P", "K"]
 
 
 def _db() -> list[dict]:
-    return json.loads((DATA_DIR / "fertilizers.json").read_text())["fertilizers"]
+    return json.loads((DATA_DIR / "fertilizers.json").read_text(encoding="utf-8"))["fertilizers"]
 
 
 def list_fertilizers() -> list[dict]:

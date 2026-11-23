@@ -14,12 +14,12 @@ def crop_model():
 @lru_cache(maxsize=1)
 def crop_profile() -> dict:
     p = MODELS_DIR / "crop_profile.json"
-    return json.loads(p.read_text()) if p.exists() else {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
 def read_json(name: str) -> dict:
     p = MODELS_DIR / name
-    return json.loads(p.read_text()) if p.exists() else {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
 def yield_model():

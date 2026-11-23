@@ -35,7 +35,7 @@ def predict(img: Image.Image, lang: str = "en") -> dict:
     if not registry.disease_model_ready():
         return {"model_status": "unavailable", "message": t("img_unavailable", lang)}
     import numpy as np
-    classes = json.loads((MODELS_DIR / "disease_classes.json").read_text())
+    classes = json.loads((MODELS_DIR / "disease_classes.json").read_text(encoding="utf-8"))
     size = registry.read_json("disease_metrics.json").get("image_size", 224)
     x = np.asarray(img.resize((size, size)), dtype="float32")[None]
     probs = _load().predict(x, verbose=0)[0]

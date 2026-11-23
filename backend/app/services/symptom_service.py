@@ -5,8 +5,8 @@ from app.i18n import t, norm
 
 def analyze(inp: dict) -> dict:
     lang = norm(inp.get("lang"))
-    kb = json.loads((DATA_DIR / "symptoms.json").read_text())["conditions"]
-    tr = json.loads((DATA_DIR / "symptoms_i18n.json").read_text())
+    kb = json.loads((DATA_DIR / "symptoms.json").read_text(encoding="utf-8"))["conditions"]
+    tr = json.loads((DATA_DIR / "symptoms_i18n.json").read_text(encoding="utf-8"))
     text = " ".join(inp.get("symptoms", []) + [inp.get("description") or ""]).lower()
     if not text.strip():
         return {"method": t("sym_method", lang), "possible_conditions": [], "message": t("sym_select", lang)}
