@@ -6,6 +6,7 @@ import { SOIL_TYPES, SEASONS } from "../data/locations.js";
 import { useLang } from "../i18n/LanguageContext.jsx";
 import { useSpeechText, useVoiceEvents } from "../voice/VoiceContext.jsx";
 import { useRelang } from "../i18n/useRelang.js";
+import { fetchWeather } from "../services/weather.js";
 
 const FEAT_KEY = { N: "crop.N", P: "crop.P", K: "crop.K", ph: "crop.ph", temperature: "crop.temp", humidity: "crop.hum", rainfall: "crop.rain" };
 
@@ -20,6 +21,17 @@ export default function CropRecommendation() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const lastRun = useRef(null);
+  const [wxBusy, setWxBusy] = useState(false);
+  const [wxMsg, setWxMsg] = useState("");
+  async function liveWeather() {
+    setWxBusy(true); setWxMsg("");
+    try {
+      const w = await fetchWeather(v.district, v.state);
+      setV((p) => ({ ...p, temperature: String(w.temperature), humidity: String(w.humidity), rainfall: String(w.rainfall) }));
+      setWxMsg(t("crop.wxOk", { place: w.place }));
+    } catch (err) { setWxMsg(t("crop.wxFail")); }
+    finally { setWxBusy(false); }
+  }
   const set = (k) => (val) => setV((p) => ({ ...p, [k]: val }));
   const sel = (k) => ({ value: v[k], onChange: (e) => set(k)(e.target.value) });
 
@@ -59,11 +71,15 @@ export default function CropRecommendation() {
             <Field label={t("common.soilType")} hint={t("crop.recordedOnly")}>
               <select {...sel("soil_type")}><option value="">{t("common.select")}</option>{SOIL_TYPES.map(([val, k]) => <option key={val} value={val}>{t(k)}</option>)}</select>
             </Field>
-            <Field label={t("common.season")} hint={t("crop.recordedOnly")}>
+            <Field label={t("common.season")} hint={t("crop.seasonHint")}>
               <select {...sel("season")}><option value="">{t("common.select")}</option>{SEASONS.map(([val, k]) => <option key={val} value={val}>{t(k)}</option>)}</select>
             </Field>
           </div>
           <h3>{t("crop.values")} <span className="req">{t("common.required")}</span></h3>
+          <div className="btn-row">
+            <button type="button" className="btn outline" disabled={wxBusy || !v.state} onClick={liveWeather}>{wxBusy ? t("common.analysing") : t("crop.wxBtn")}</button>
+            {wxMsg && <span className="muted small">{wxMsg}</span>}
+          </div>
           <div className="form-grid">
             <Field label={t("crop.N")}><NumberInput required min={0} max={300} value={v.N} onChange={set("N")} /></Field>
             <Field label={t("crop.P")}><NumberInput required min={0} max={300} value={v.P} onChange={set("P")} /></Field>
@@ -95,6 +111,7 @@ export default function CropRecommendation() {
                     {i === 0 && <span className="badge green">{t("crop.best")}</span>}
                   </div>
                   <Bar label={t("crop.prob")} value={r.model_probability} />
+                  {r.regional && <List items={[r.regional.text]} tone={r.regional.ok ? "ok" : "warn"} />}
                   <h4>{t("crop.why")}</h4><List items={r.reasons} tone="ok" />
                   {r.warnings.length > 0 && <><h4>{t("crop.check")}</h4><List items={r.warnings} tone="warn" /></>}
                 </div>

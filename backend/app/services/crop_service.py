@@ -1,6 +1,6 @@
 import pandas as pd
 from app.i18n import t, crop_name
-from app.services import registry
+from app.services import registry, regional_service
 
 UNITS = {"temperature": "°C", "humidity": "%", "rainfall": "mm"}
 
@@ -30,8 +30,9 @@ def recommend(inp: dict) -> dict:
             key = "crop_in" if r["p10"] <= v <= r["p90"] else "crop_out"
             (reasons if key == "crop_in" else warnings).append(
                 t(key, lang, name=t("f_" + f, lang), v=v, unit=unit, crop=label, span=span))
+        regional = regional_service.message(crop, label, inp.get("state"), inp.get("season"), lang)
         recs.append({"crop": crop, "crop_label": label, "model_probability": round(float(proba[i]), 4),
-                     "reasons": reasons, "warnings": warnings})
+                     "reasons": reasons, "warnings": warnings, "regional": regional})
 
     notes = [t("note_prob", lang)]
     ranges = registry.read_json("crop_feature_ranges.json")
