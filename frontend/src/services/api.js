@@ -52,6 +52,9 @@ export const api = {
     return request(`/api/health/image${q}`, { method: "POST", body: fd });
   },
   fertilizers: () => request(`/api/fertilizers?lang=${LANG}`),
+  problems: () => request(`/api/problems?lang=${LANG}`),
+  areaCrops: (state, district, season) => request(`/api/area/crops?state=${encodeURIComponent(state)}`
+    + (district ? `&district=${encodeURIComponent(district)}` : "") + (season ? `&season=${encodeURIComponent(season)}` : "")),
   evaluateFertilizer: (b) => request("/api/fertilizer/evaluate", json(b)),
   history: (module, limit = 50) =>
     request(`/api/history?limit=${limit}${module ? `&module=${module}` : ""}`),

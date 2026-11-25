@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, HTTPException, Query, Response, UploadFile
 from app.database import db
 from app.i18n import LANGS, crop_name, norm, t
 from app.schemas.schemas import CropRecommendationIn, FertilizerIn, SymptomIn, TTSIn, YieldIn
-from app.services import registry, crop_service, disease_service, fertilizer_service, symptom_service, yield_service
+from app.services import registry, crop_service, disease_service, fertilizer_service, symptom_service, yield_service, soil_service
 
 router = APIRouter(prefix="/api")
 
@@ -26,6 +26,8 @@ def crop_recommend(body: CropRecommendationIn):
     res = crop_service.recommend(inp)
     if res["model_status"] == "unavailable":
         raise HTTPException(503, res["message"])
+    if res["model_status"] == "needs_input":
+        raise HTTPException(422, res["message"])
     top = res["recommendations"][0]
     res["history_id"] = _save(body.relocalize, "crop_recommendation", inp, res,
                               t("sum_crop", lang, crop=top["crop_label"], p=round(top["model_probability"] * 100)),
@@ -43,6 +45,8 @@ def yield_predict(body: YieldIn):
     inp = body.model_dump()
     lang = norm(body.lang)
     res = yield_service.predict(inp)
+    if res.get("model_status") == "trained" and "error" not in res:
+        res["soil_suitability"] = soil_service.yield_soil_check(inp, lang)
     if res["model_status"] == "unavailable":
         raise HTTPException(503, res["message"])
     if "error" in res:
@@ -94,7 +98,11 @@ def fertilizers(lang: str = Query("en")):
 def fertilizer_evaluate(body: FertilizerIn):
     inp = body.model_dump()
     lang = norm(body.lang)
+    inp, estimated = soil_service.fill_nutrients(inp)
     res = fertilizer_service.evaluate(inp)
+    res["estimated"] = estimated
+    if inp.get("problem"):
+        res["problem_note"] = soil_service.problem_note(inp["problem"], res, lang)
     res["history_id"] = _save(body.relocalize, "fertilizer_evaluation", inp, res,
                               t("sum_fert", lang, f=inp["fertilizer"], crop=res.get("crop_label", inp["crop"]),
                                 v=t("verdict_" + res["verdict"], lang)),

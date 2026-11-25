@@ -8,7 +8,7 @@ import { useSpeechText, useVoiceEvents } from "../voice/VoiceContext.jsx";
 import { useRelang } from "../i18n/useRelang.js";
 
 const NUM = ["ph", "N", "P", "K"];
-const INIT = { crop: "", soil_type: "", ph: "", N: "", P: "", K: "", state: "", district: "", village: "", fertilizer: "" };
+const INIT = { crop: "", soil_type: "", ph: "", N: "", P: "", K: "", state: "", district: "", village: "", fertilizer: "", n_level: "", p_level: "", k_level: "", problem: "" };
 const OTHER = "__other__";
 const VERDICT = { suitable: ["green", "fert.suitable"], potentially_suitable: ["amber", "fert.potential"], unsuitable: ["red", "fert.unsuitable"], cannot_evaluate: ["gray", "fert.cannot"] };
 const NUT_KEY = { N: "fert.nitrogen", P: "fert.phosphorus", K: "fert.potassium" };
@@ -18,6 +18,7 @@ export default function FertilizerEvaluation() {
   const [v, setV] = useState(INIT);
   const [custom, setCustom] = useState(["", "", ""]);
   const [lists, setLists] = useState({ fertilizers: [], crops: [] });
+  const [problems, setProblems] = useState([]);
   const [res, setRes] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -26,6 +27,7 @@ export default function FertilizerEvaluation() {
   const sel = (k) => ({ value: v[k], onChange: (e) => set(k)(e.target.value) });
 
   useEffect(() => { api.fertilizers().then(setLists).catch((e) => setError(e.message)); }, [lang]);
+  useEffect(() => { api.problems().then((r) => setProblems(r.problems)).catch(() => {}); }, [lang]);
 
   const reset = useCallback(() => { setV(INIT); setCustom(["", "", ""]); setRes(null); setError(""); lastRun.current = null; }, []);
   useRelang(lastRun, setRes);
@@ -75,10 +77,20 @@ export default function FertilizerEvaluation() {
             </Field>
             <LocationFields value={v} onChange={(loc) => setV((p) => ({ ...p, ...loc }))} />
             <Field label={t("fert.ph")}><NumberInput min={3} max={10} value={v.ph} onChange={set("ph")} /></Field>
-            <Field label={t("fert.N")} hint={t("fert.fromTest")}><NumberInput required min={0} max={300} value={v.N} onChange={set("N")} /></Field>
-            <Field label={t("fert.P")}><NumberInput required min={0} max={300} value={v.P} onChange={set("P")} /></Field>
-            <Field label={t("fert.K")}><NumberInput required min={0} max={400} value={v.K} onChange={set("K")} /></Field>
+            <Field label={t("fert.N")} hint={t("fert.fromTest")}><NumberInput min={0} max={300} value={v.N} onChange={set("N")} /></Field>
+            <Field label={t("fert.P")}><NumberInput min={0} max={300} value={v.P} onChange={set("P")} /></Field>
+            <Field label={t("fert.K")}><NumberInput min={0} max={400} value={v.K} onChange={set("K")} /></Field>
           </div>
+          <p className="muted small">{t("crop.dontHelp")}</p>
+          <div className="form-grid">
+            {[["n_level", "fert.N"], ["p_level", "fert.P"], ["k_level", "fert.K"]].map(([k, lab]) => (
+              <Field key={k} label={t(lab)}><select {...sel(k)}><option value="">{t("lvl.none")}</option><option value="low">{t("lvl.low")}</option><option value="medium">{t("lvl.med")}</option><option value="high">{t("lvl.high")}</option></select></Field>
+            ))}
+          </div>
+          <Field label={t("fert.problem")}>
+            <select {...sel("problem")}><option value="">{t("fert.problemNone")}</option>{problems.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
+          </Field>
+          <p className="muted small">{t("soil.tip")}</p>
           <h3>{t("fert.yours")}</h3>
           <Field label={t("fert.selected")}>
             <select required {...sel("fertilizer")}>
@@ -122,6 +134,8 @@ export default function FertilizerEvaluation() {
                 </div>
                 <h4>{t("fert.why")}</h4><List items={res.reasons} />
                 {res.ph_note && <Alert kind="warn">{res.ph_note}</Alert>}
+                {res.estimated && res.estimated.length > 0 && <Alert kind="warn">{t("crop.estNote")}</Alert>}
+                {res.problem_note && <Alert kind="info">{t("prob." + res.problem_note.group, { name: res.problem_note.name })}{res.problem_note.missing ? " " + t("prob.missing", { nut: t(NUT_KEY[res.problem_note.missing]) }) : ""}</Alert>}
               </div>
               {res.alternative && (
                 <div className="card result alt-card">

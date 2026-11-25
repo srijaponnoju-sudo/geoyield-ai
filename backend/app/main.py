@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import ALLOWED_ORIGINS
 from app.database import db
 from app.routes.api import router
+from app.routes.extras import router as extras_router
 
 
 @asynccontextmanager
@@ -16,6 +17,7 @@ app = FastAPI(title="GeoYield AI API", description="Smart Farming. Better Yield.
               version="1.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 app.include_router(router)
+app.include_router(extras_router)
 
 
 @app.get("/")

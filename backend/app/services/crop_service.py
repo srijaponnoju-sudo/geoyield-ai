@@ -1,6 +1,6 @@
 import pandas as pd
 from app.i18n import t, crop_name
-from app.services import registry, regional_service
+from app.services import registry, regional_service, soil_service
 
 UNITS = {"temperature": "°C", "humidity": "%", "rainfall": "mm"}
 
@@ -10,6 +10,11 @@ def recommend(inp: dict) -> dict:
     bundle = registry.crop_model()
     if not bundle:
         return {"model_status": "unavailable", "message": t("crop_model_missing", lang)}
+    inp, estimated = soil_service.fill_crop_inputs(inp)
+    missing = [f for f in ("N", "P", "K", "ph", "temperature", "humidity", "rainfall") if inp.get(f) is None]
+    if missing:
+        return {"model_status": "needs_input",
+                "message": soil_service.NEED_SOIL if set(missing) & {"N", "P", "K"} else "Missing: " + ", ".join(missing)}
     feats = bundle["features"]
     X = pd.DataFrame([{f: inp[f] for f in feats}])
     proba = bundle["model"].predict_proba(X)[0]
@@ -48,5 +53,5 @@ def recommend(inp: dict) -> dict:
     return {
         "model_status": "trained", "recommendations": recs,
         "model_metrics": registry.read_json("crop_recommendation_metrics.json"),
-        "notes": notes, "low_confidence": top_p < 0.5 or bool(odd),
+        "notes": notes, "low_confidence": top_p < 0.5 or bool(odd) or bool(estimated), "estimated": estimated,
     }

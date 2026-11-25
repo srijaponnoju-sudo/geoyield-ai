@@ -1,5 +1,7 @@
 // UI text in English / Hindi / Telugu. Each entry: key: [English, Hindi, Telugu]. Use {name} for placeholders.
 // Translations were prepared with AI assistance - please have a native speaker review them before the final demo.
+import { SOIL_T } from "./translations_soil.js";
+
 const T = {
   // ---- common
   "app.tagline": ["Smart Farming. Better Yield.", "स्मार्ट खेती। बेहतर उपज।", "స్మార్ట్ వ్యవసాయం. మెరుగైన దిగుబడి."],
@@ -274,7 +276,7 @@ const T = {
 
 export const LANGS = [["en", "English"], ["hi", "हिन्दी"], ["te", "తెలుగు"]];
 export const translations = { en: {}, hi: {}, te: {} };
-for (const [k, v] of Object.entries(T)) {
+for (const [k, v] of Object.entries({ ...T, ...SOIL_T })) {
   if (v.length !== 3) throw new Error("Translation entry needs 3 languages: " + k);
   translations.en[k] = v[0]; translations.hi[k] = v[1]; translations.te[k] = v[2];
 }

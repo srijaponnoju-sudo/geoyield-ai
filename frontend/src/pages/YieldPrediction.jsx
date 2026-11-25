@@ -4,11 +4,12 @@ import { PageHeader, Field, NumberInput, Alert, Spinner, List, SpeakButton } fro
 import { useLang } from "../i18n/LanguageContext.jsx";
 import { useSpeechText, useVoiceEvents } from "../voice/VoiceContext.jsx";
 import { useRelang } from "../i18n/useRelang.js";
+import { SOIL_TYPES } from "../data/locations.js";
 
 const SEASON_KEY = { Kharif: "season.kharif", Rabi: "season.rabi", Summer: "season.summer", "Whole Year": "season.whole", Autumn: "season.autumn", Winter: "season.winter" };
 const INPUT_KEY = { state: "common.state", district: "common.district", crop: "common.crop", season: "common.season", area_hectares: "yield.area" };
 
-const INIT = { state: "", district: "", crop: "", season: "", area_hectares: "1" };
+const INIT = { state: "", district: "", crop: "", season: "", area_hectares: "1", soil_type: "", n_level: "", p_level: "", k_level: "" };
 const pretty = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 
 export default function YieldPrediction() {
@@ -37,7 +38,7 @@ export default function YieldPrediction() {
 
   function example() {
     const state = opts.states.includes("Telangana") ? "Telangana" : opts.states[0] || "";
-    setV({ state, district: (opts.districts[state] || [])[0] || "", crop: opts.crops.includes("Rice") ? "Rice" : opts.crops[0] || "", season: "Kharif", area_hectares: "1" });
+    setV({ ...INIT, state, district: (opts.districts[state] || [])[0] || "", crop: opts.crops.includes("Rice") ? "Rice" : opts.crops[0] || "", season: "Kharif", area_hectares: "1" });
   }
 
   async function submit(e) {
@@ -81,6 +82,16 @@ export default function YieldPrediction() {
               <NumberInput required min={0.01} value={v.area_hectares} onChange={set("area_hectares")} />
             </Field>
           </div>
+          <h3>{t("yield.soilSection")}</h3>
+          <div className="form-grid">
+            <Field label={t("common.soilType")}>
+              <select {...sel("soil_type")}><option value="">{t("common.select")}</option>{SOIL_TYPES.map(([val, k]) => <option key={val} value={val}>{t(k)}</option>)}</select>
+            </Field>
+            {[["n_level", "crop.N"], ["p_level", "crop.P"], ["k_level", "crop.K"]].map(([k, lab]) => (
+              <Field key={k} label={t(lab)}><select {...sel(k)}><option value="">{t("lvl.none")}</option><option value="low">{t("lvl.low")}</option><option value="medium">{t("lvl.med")}</option><option value="high">{t("lvl.high")}</option></select></Field>
+            ))}
+          </div>
+          <p className="muted small">{t("yield.soilNote")}</p>
           <p className="muted small">{t("yield.note")}</p>
           <div className="btn-row">
             <button className="btn primary lg" disabled={busy}>{busy ? t("yield.predicting") : t("yield.btn")}</button>
@@ -115,6 +126,13 @@ export default function YieldPrediction() {
                       <div><span>MAE</span><b>{res.metrics.MAE}</b></div><div><span>RMSE</span><b>{res.metrics.RMSE}</b></div><div><span>R²</span><b>{res.metrics.R2}</b></div>
                     </div>
                     <p className="muted small">{t("yield.base", { r2: res.metrics.baseline_crop_average_R2 })} {t("yield.testNote")}</p>
+                  </>
+                )}
+                {res.soil_suitability && (
+                  <>
+                    <h4>{t("yield.soilTitle")}</h4>
+                    {res.soil_suitability.available ? <List items={res.soil_suitability.lines} tone={res.soil_suitability.ok ? "ok" : "warn"} /> : <p className="muted small">{t("yield.soilNA")}</p>}
+                    {res.soil_suitability.estimated && <p className="muted small">{t("crop.estNote")}</p>}
                   </>
                 )}
                 <Alert kind="warn">{res.disclaimer}</Alert>
