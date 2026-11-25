@@ -9,3 +9,5 @@ backend/ml/datasets/PlantVillage-Dataset/
 backend/models_store/*.keras
 *.log
 .vscode/
+
+backend/models_store/backup_disease/

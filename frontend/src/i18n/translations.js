@@ -1,6 +1,7 @@
 // UI text in English / Hindi / Telugu. Each entry: key: [English, Hindi, Telugu]. Use {name} for placeholders.
 // Translations were prepared with AI assistance - please have a native speaker review them before the final demo.
 import { SOIL_T } from "./translations_soil.js";
+import { REG_T } from "./translations_regional.js";
 
 const T = {
   // ---- common
@@ -276,7 +277,7 @@ const T = {
 
 export const LANGS = [["en", "English"], ["hi", "हिन्दी"], ["te", "తెలుగు"]];
 export const translations = { en: {}, hi: {}, te: {} };
-for (const [k, v] of Object.entries({ ...T, ...SOIL_T })) {
+for (const [k, v] of Object.entries({ ...T, ...SOIL_T, ...REG_T })) {
   if (v.length !== 3) throw new Error("Translation entry needs 3 languages: " + k);
   translations.en[k] = v[0]; translations.hi[k] = v[1]; translations.te[k] = v[2];
 }

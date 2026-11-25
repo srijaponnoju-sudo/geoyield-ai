@@ -21,6 +21,8 @@ class CropRecommendationIn(Location):
     p_level: Optional[str] = Field(None, max_length=10)
     k_level: Optional[str] = Field(None, max_length=10)
     water: Optional[str] = Field(None, max_length=10, description="low | medium | high")
+    irrigation: Optional[str] = Field(None, max_length=10, description="rainfed | irrigated")
+    last_crop: Optional[str] = Field(None, max_length=40)
     temperature: float = Field(..., ge=0, le=55, description="deg C")
     humidity: float = Field(..., ge=0, le=100, description="%")
     rainfall: Optional[float] = Field(None, ge=0, le=500, description="mm")

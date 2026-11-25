@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, cleanPayload } from "../services/api.js";
 import { PageHeader, Field, NumberInput, Alert, Bar, Spinner, List, SpeakButton, cap } from "../components/ui.jsx";
 import LocationFields from "../components/LocationFields.jsx";
@@ -11,11 +11,11 @@ import { fetchWeather } from "../services/weather.js";
 const FEAT_KEY = { N: "crop.N", P: "crop.P", K: "crop.K", ph: "crop.ph", temperature: "crop.temp", humidity: "crop.hum", rainfall: "crop.rain" };
 
 const NUM = ["N", "P", "K", "ph", "temperature", "humidity", "rainfall"];
-const INIT = { state: "", district: "", village: "", soil_type: "", season: "", N: "", P: "", K: "", ph: "", temperature: "", humidity: "", rainfall: "", n_level: "", p_level: "", k_level: "", water: "" };
+const INIT = { state: "", district: "", village: "", soil_type: "", season: "", N: "", P: "", K: "", ph: "", temperature: "", humidity: "", rainfall: "", n_level: "", p_level: "", k_level: "", water: "", irrigation: "", last_crop: "" };
 const EXAMPLE = { N: "90", P: "42", K: "43", ph: "6.5", temperature: "21", humidity: "82", rainfall: "203" };
 
 export default function CropRecommendation() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [v, setV] = useState(INIT);
   const [res, setRes] = useState(null);
   const [error, setError] = useState("");
@@ -36,6 +36,8 @@ export default function CropRecommendation() {
   const [mode, setMode] = useState("dont");
   const [area, setArea] = useState(null);
   const [areaBusy, setAreaBusy] = useState(false);
+  const [cropList, setCropList] = useState([]);
+  useEffect(() => { api.fertilizers().then((r) => setCropList(r.crops)).catch(() => {}); }, [lang]);
   async function loadArea() {
     if (!v.state) { setArea({ error: t("crop.areaFail") }); return; }
     setAreaBusy(true);
@@ -121,6 +123,8 @@ export default function CropRecommendation() {
             <Field label={t("crop.hum")}><NumberInput required min={0} max={100} value={v.humidity} onChange={set("humidity")} /></Field>
             <Field label={t("crop.rain")}><NumberInput min={0} max={500} value={v.rainfall} onChange={set("rainfall")} /></Field>
             <Field label={t("crop.water")} hint={t("crop.waterHint")}><select {...sel("water")}><option value="">{t("lvl.none")}</option><option value="low">{t("lvl.low")}</option><option value="medium">{t("lvl.med")}</option><option value="high">{t("lvl.high")}</option></select></Field>
+            <Field label={t("crop.irrig")}><select {...sel("irrigation")}><option value="">{t("lvl.none")}</option><option value="rainfed">{t("crop.rainfed")}</option><option value="irrigated">{t("crop.irrigated")}</option></select></Field>
+            <Field label={t("crop.lastCrop")}><select {...sel("last_crop")}><option value="">{t("crop.lastNone")}</option>{cropList.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select></Field>
           </div>
           <div className="btn-row">
             <button className="btn primary lg" disabled={busy}>{busy ? t("common.analysing") : t("crop.btn")}</button>
@@ -136,6 +140,7 @@ export default function CropRecommendation() {
           {res && (
             <div className="results">
               {res.estimated && res.estimated.length > 0 && <Alert kind="warn">{t("crop.estNote")}</Alert>}
+              {res.regional_applied && <Alert kind="info">{t("crop.regNote")}</Alert>}
               {res.low_confidence && <Alert kind="warn" title={t("crop.warnTitle")}>{res.notes.slice(0, 2).filter((n) => n).join(" ")}</Alert>}
               <SpeakButton text={speech} />
               {res.recommendations.map((r, i) => (
@@ -145,6 +150,8 @@ export default function CropRecommendation() {
                     {i === 0 && <span className="badge green">{t("crop.best")}</span>}
                   </div>
                   <Bar label={t("crop.prob")} value={r.model_probability} />
+                  {res.regional_applied && <Bar label={t("crop.adj")} value={r.adjusted_probability} />}
+                  {r.rotation && <List items={[t("rot." + r.rotation)]} tone={r.rotation === "repeat" ? "warn" : "ok"} />}
                   {r.regional && <List items={[r.regional.text]} tone={r.regional.ok ? "ok" : "warn"} />}
                   <h4>{t("crop.why")}</h4><List items={r.reasons} tone="ok" />
                   {r.warnings.length > 0 && <><h4>{t("crop.check")}</h4><List items={r.warnings} tone="warn" /></>}

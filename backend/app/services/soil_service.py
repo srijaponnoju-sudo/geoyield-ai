@@ -35,6 +35,37 @@ SOIL = {
 }
 
 
+@lru_cache(maxsize=1)
+def _district_table() -> dict:
+    """Optional real Soil Health Card levels per district (file made by ml/soil_data/import_shc.py)."""
+    p = DATA_DIR / "district_soil.csv"
+    if not p.exists():
+        return {}
+    try:
+        d = pd.read_csv(p, dtype=str).fillna("")
+    except Exception:
+        return {}
+    return {(r.get("state", "").strip().lower(), r.get("district", "").strip().lower()): r for r in d.to_dict("records")}
+
+
+def _district_row(inp):
+    st, di = (inp.get("state") or "").strip().lower(), (inp.get("district") or "").strip().lower()
+    return _district_table().get((st, di)) if st and di else None
+
+
+def _district_level(inp, nut):
+    row = _district_row(inp)
+    return _lvl(row.get(nut.lower() + "_level")) if row else None
+
+
+def _district_ph(inp):
+    row = _district_row(inp)
+    try:
+        return float(row.get("ph")) if row and row.get("ph") else None
+    except ValueError:
+        return None
+
+
 def _lvl(x):
     x = (x or "").strip().lower()
     return x if x in ("low", "medium", "high") else None
@@ -48,13 +79,18 @@ def fill_nutrients(inp: dict, with_ph: bool = False) -> tuple[dict, list]:
     for nut in ("N", "P", "K"):
         if out.get(nut) is not None:
             continue
-        level = _lvl(out.get(nut.lower() + "_level")) or (defaults[nut] if defaults else None)
+        level = _lvl(out.get(nut.lower() + "_level")) or _district_level(inp, nut) or (defaults[nut] if defaults else None)
         if level:
             out[nut] = LEVEL_VALUE[nut][level]
             est.append(nut)
-    if with_ph and out.get("ph") is None and defaults:
-        out["ph"] = defaults["ph"]
-        est.append("ph")
+    if with_ph and out.get("ph") is None:
+        d_ph = _district_ph(inp)
+        if d_ph is not None:
+            out["ph"] = d_ph
+            est.append("ph")
+        elif defaults:
+            out["ph"] = defaults["ph"]
+            est.append("ph")
     return out, est
 
 
@@ -64,6 +100,10 @@ def fill_crop_inputs(inp: dict) -> tuple[dict, list]:
     if out.get("rainfall") is None and _lvl(out.get("water")):
         out["rainfall"] = RAIN_VALUE[_lvl(out["water"])]
         est.append("rainfall")
+    if (out.get("irrigation") or "").strip().lower() == "irrigated" and (out.get("rainfall") is None or out["rainfall"] < RAIN_VALUE["medium"]):
+        out["rainfall"] = RAIN_VALUE["medium"]          # irrigated fields do not depend on rainfall alone
+        if "rainfall" not in est:
+            est.append("rainfall")
     return out, est
 
 

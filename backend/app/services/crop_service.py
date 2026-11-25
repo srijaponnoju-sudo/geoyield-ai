@@ -1,6 +1,6 @@
 import pandas as pd
 from app.i18n import t, crop_name
-from app.services import registry, regional_service, soil_service
+from app.services import registry, regional_rank, regional_service, soil_service
 
 UNITS = {"temperature": "°C", "humidity": "%", "rainfall": "mm"}
 
@@ -20,7 +20,8 @@ def recommend(inp: dict) -> dict:
     proba = bundle["model"].predict_proba(X)[0]
     classes = bundle["model"].classes_
     profile = registry.crop_profile()
-    order = proba.argsort()[::-1][: inp.get("top_k", 3)]
+    adj, regional_applied = regional_rank.adjust(proba, classes, inp.get("state"), inp.get("district"), inp.get("season"), X.iloc[0].values, feats)
+    order = adj.argsort()[::-1][: inp.get("top_k", 3)]
     recs = []
     for i in order:
         crop = classes[i]
@@ -37,7 +38,8 @@ def recommend(inp: dict) -> dict:
                 t(key, lang, name=t("f_" + f, lang), v=v, unit=unit, crop=label, span=span))
         regional = regional_service.message(crop, label, inp.get("state"), inp.get("season"), lang)
         recs.append({"crop": crop, "crop_label": label, "model_probability": round(float(proba[i]), 4),
-                     "reasons": reasons, "warnings": warnings, "regional": regional})
+                     "reasons": reasons, "warnings": warnings, "regional": regional,
+                     "adjusted_probability": round(float(adj[i]), 4), "rotation": regional_rank.rotation(inp.get("last_crop"), crop)})
 
     notes = [t("note_prob", lang)]
     ranges = registry.read_json("crop_feature_ranges.json")
@@ -53,5 +55,5 @@ def recommend(inp: dict) -> dict:
     return {
         "model_status": "trained", "recommendations": recs,
         "model_metrics": registry.read_json("crop_recommendation_metrics.json"),
-        "notes": notes, "low_confidence": top_p < 0.5 or bool(odd) or bool(estimated), "estimated": estimated,
+        "notes": notes, "low_confidence": top_p < 0.5 or bool(odd) or bool(estimated), "estimated": estimated, "regional_applied": regional_applied,
     }
