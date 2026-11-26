@@ -6,7 +6,7 @@ import { LANGS } from "../i18n/translations.js";
 
 const LINKS = [
   ["/dashboard", "nav.dashboard"], ["/crop-recommendation", "nav.crop"], ["/yield-prediction", "nav.yield"],
-  ["/crop-health", "nav.health"], ["/fertilizer", "nav.fertilizer"], ["/history", "nav.history"], ["/about", "nav.about"],
+  ["/crop-health", "nav.health"], ["/fertilizer", "nav.fertilizer"], ["/profit", "nav.profit"], ["/schemes", "nav.schemes"], ["/history", "nav.history"], ["/about", "nav.about"],
 ];
 
 export default function Navbar() {

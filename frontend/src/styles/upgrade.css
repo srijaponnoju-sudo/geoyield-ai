@@ -1,0 +1,19 @@
+/* Styles for Profit mode, Schemes and the feedback box */
+.form-grid.three { grid-template-columns: repeat(3, 1fr); }
+.inline-pair { display: flex; gap: .5rem; } .inline-pair input { flex: 1; min-width: 0; } .inline-pair select { width: 8.5rem; }
+.chips { display: flex; flex-wrap: wrap; gap: .45rem; margin: .4rem 0 .8rem; }
+.chip { display: inline-flex; align-items: center; gap: .35rem; background: var(--green-l); color: var(--green-d); border-radius: 99px; padding: .3rem .4rem .3rem .8rem; font-weight: 600; font-size: .88rem; }
+.chip button { border: 0; background: rgba(0,0,0,.08); border-radius: 50%; width: 1.4rem; height: 1.4rem; cursor: pointer; line-height: 1; font-size: 1rem; color: inherit; }
+.table-wrap { overflow-x: auto; }
+.ptable { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.ptable th { text-align: left; font-size: .74rem; color: var(--muted); font-weight: 700; padding: .4rem .5rem; border-bottom: 2px solid var(--line); white-space: nowrap; }
+.ptable td { padding: .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.ptable tr.top td { background: var(--green-l); }
+.ptable input.cell { width: 6.5rem; padding: .35rem .5rem; border: 1.5px solid var(--line); border-radius: 8px; font: inherit; }
+.ptable .err { color: var(--red); } .mt-s { margin-top: .8rem; }
+.feedback .fb-more { margin-top: .9rem; display: grid; gap: .7rem; max-width: 460px; }
+.scheme-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; margin-top: 1rem; }
+.scheme .scheme-rel { background: var(--green-l); color: var(--green-d); border-radius: 10px; padding: .45rem .7rem; font-size: .9rem; }
+.grid.six { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 1250px) { .nav-links a { padding: .45rem .5rem; font-size: .84rem; } }
+@media (max-width: 900px) { .scheme-grid, .grid.six { grid-template-columns: 1fr; } .form-grid.three { grid-template-columns: 1fr; } }

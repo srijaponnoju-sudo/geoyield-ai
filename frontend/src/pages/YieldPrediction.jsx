@@ -5,6 +5,7 @@ import { useLang } from "../i18n/LanguageContext.jsx";
 import { useSpeechText, useVoiceEvents } from "../voice/VoiceContext.jsx";
 import { useRelang } from "../i18n/useRelang.js";
 import { SOIL_TYPES } from "../data/locations.js";
+import FeedbackBox from "../components/FeedbackBox.jsx";
 
 const SEASON_KEY = { Kharif: "season.kharif", Rabi: "season.rabi", Summer: "season.summer", "Whole Year": "season.whole", Autumn: "season.autumn", Winter: "season.winter" };
 const INPUT_KEY = { state: "common.state", district: "common.district", crop: "common.crop", season: "common.season", area_hectares: "yield.area" };
@@ -22,12 +23,14 @@ export default function YieldPrediction() {
   const [busy, setBusy] = useState(false);
 
   const lastRun = useRef(null);
+  const hid = useRef(null);
+  if (res?.history_id) hid.current = res.history_id;
   useEffect(() => { api.yieldOptions().then(setOpts).catch((e) => setError(e.message)); }, []);
   const set = (k) => (val) => setV((p) => ({ ...p, [k]: val }));
   const sel = (k) => ({ value: v[k], onChange: (e) => set(k)(e.target.value) });
   const districts = opts.districts[v.state] || [];
 
-  const reset = useCallback(() => { setV(INIT); setRes(null); setError(""); setUnavailable(""); lastRun.current = null; }, []);
+  const reset = useCallback(() => { setV(INIT); setRes(null); setError(""); setUnavailable(""); lastRun.current = null; hid.current = null; }, []);
   useRelang(lastRun, setRes);
   const onFill = useCallback((f) => {
     if (f.area_hectares === undefined) return [];
@@ -43,7 +46,7 @@ export default function YieldPrediction() {
 
   async function submit(e) {
     e.preventDefault();
-    setBusy(true); setError(""); setRes(null); setUnavailable("");
+    setBusy(true); setError(""); setRes(null); setUnavailable(""); hid.current = null;
     const payload = cleanPayload(v, ["area_hectares"]);
     lastRun.current = (re) => api.predictYield({ ...payload, relocalize: !!re });
     try { setRes(await lastRun.current(false)); }
@@ -56,7 +59,7 @@ export default function YieldPrediction() {
 
   return (
     <>
-      <PageHeader icon="📈" title={t("yield.title")} subtitle={t("yield.sub")} />
+      <PageHeader icon={"\u{1F4C8}"} title={t("yield.title")} subtitle={t("yield.sub")} />
       <div className="container page two-col wide-left">
         <form className="card form" onSubmit={submit}>
           <h3>{t("yield.select")}</h3>
@@ -123,7 +126,7 @@ export default function YieldPrediction() {
                   <>
                     <h4>{t("yield.acc")}</h4>
                     <div className="metric-grid">
-                      <div><span>MAE</span><b>{res.metrics.MAE}</b></div><div><span>RMSE</span><b>{res.metrics.RMSE}</b></div><div><span>R²</span><b>{res.metrics.R2}</b></div>
+                      <div><span>MAE</span><b>{res.metrics.MAE}</b></div><div><span>RMSE</span><b>{res.metrics.RMSE}</b></div><div><span>R{"\u00B2"}</span><b>{res.metrics.R2}</b></div>
                     </div>
                     <p className="muted small">{t("yield.base", { r2: res.metrics.baseline_crop_average_R2 })} {t("yield.testNote")}</p>
                   </>
@@ -137,6 +140,7 @@ export default function YieldPrediction() {
                 )}
                 <Alert kind="warn">{res.disclaimer}</Alert>
               </div>
+              {hid.current && <FeedbackBox key={hid.current} module="yield_prediction" historyId={hid.current} kind="yield" />}
             </div>
           )}
         </div>

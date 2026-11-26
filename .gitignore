@@ -11,3 +11,5 @@ backend/models_store/*.keras
 .vscode/
 
 backend/models_store/backup_disease/
+
+_backup_before_upgrade_*/

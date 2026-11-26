@@ -7,6 +7,7 @@ import { useLang } from "../i18n/LanguageContext.jsx";
 import { useSpeechText, useVoiceEvents } from "../voice/VoiceContext.jsx";
 import { useRelang } from "../i18n/useRelang.js";
 import { fetchWeather } from "../services/weather.js";
+import FeedbackBox from "../components/FeedbackBox.jsx";
 
 const FEAT_KEY = { N: "crop.N", P: "crop.P", K: "crop.K", ph: "crop.ph", temperature: "crop.temp", humidity: "crop.hum", rainfall: "crop.rain" };
 
@@ -21,6 +22,8 @@ export default function CropRecommendation() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const lastRun = useRef(null);
+  const hid = useRef(null);
+  if (res?.history_id) hid.current = res.history_id;
   const [wxBusy, setWxBusy] = useState(false);
   const [wxMsg, setWxMsg] = useState("");
   async function liveWeather() {
@@ -47,7 +50,7 @@ export default function CropRecommendation() {
   }
   const sel = (k) => ({ value: v[k], onChange: (e) => set(k)(e.target.value) });
 
-  const reset = useCallback(() => { setV(INIT); setRes(null); setError(""); lastRun.current = null; }, []);
+  const reset = useCallback(() => { setV(INIT); setRes(null); setError(""); lastRun.current = null; hid.current = null; }, []);
   useRelang(lastRun, setRes);
   const onFill = useCallback((f) => {
     const keys = Object.keys(f).filter((k) => NUM.includes(k));
@@ -58,7 +61,7 @@ export default function CropRecommendation() {
 
   async function submit(e) {
     e.preventDefault();
-    setBusy(true); setError(""); setRes(null);
+    setBusy(true); setError(""); setRes(null); hid.current = null;
     const payload = { ...cleanPayload(v, NUM), top_k: 3 };
     if (mode === "dont") { delete payload.N; delete payload.P; delete payload.K; } else { delete payload.n_level; delete payload.p_level; delete payload.k_level; }
     if (mode === "dont" && !payload.soil_type && !payload.n_level && !payload.p_level && !payload.k_level) { setError(t("crop.needSoil")); setBusy(false); return; }
@@ -76,7 +79,7 @@ export default function CropRecommendation() {
 
   return (
     <>
-      <PageHeader icon="🌾" title={t("crop.title")} subtitle={t("crop.sub")} />
+      <PageHeader icon={"\u{1F33E}"} title={t("crop.title")} subtitle={t("crop.sub")} />
       <div className="container page two-col wide-left">
         <form className="card form" onSubmit={submit}>
           <h3>{t("crop.farm")}</h3>
@@ -168,6 +171,7 @@ export default function CropRecommendation() {
                 ))}
                 <h4>{t("crop.notes")}</h4><List items={res.notes} />
               </div>
+              {hid.current && <FeedbackBox key={hid.current} module="crop_recommendation" historyId={hid.current} kind="crop" />}
             </div>
           )}
         </div>
